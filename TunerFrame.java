@@ -14,6 +14,7 @@ public class TunerFrame extends JFrame implements Observer {
     String TITLE_TEXT = "sTuner";
     String STEP_BUTTON_TEXT = "Next string";
     String AUTO_BUTTON_TEXT = "Auto mode";
+    final int CENT_THRESHOLD = 10;
     
     // GUI components
     JButton stepButton;
@@ -34,7 +35,21 @@ public class TunerFrame extends JFrame implements Observer {
     }
 
     public void update(Observable o, Object arg) {
-        // TODO
+        int cents = (Integer) arg;
+        centLabel.setText(String.format("%d", cents));
+        if (Math.abs(cents) < CENT_THRESHOLD) {
+            // TODO Light both indicators
+        }
+        else if (cents < 0) {
+            // TODO Change flat indicator label
+        }
+        else if (cents > 0) {
+            // TODO Change sharp indicator label
+        }
+    }
+
+    public void setCurrentString(PitchComparator.GuitarString s) {
+        // TODO Switch statement for GuitarString values
     }
 
     private void setupLabels() {
@@ -76,7 +91,7 @@ public class TunerFrame extends JFrame implements Observer {
 
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        
+            
         // Set the default GridBag settings
         c.weightx = DEFAULT_WEIGHT;
         c.weighty = DEFAULT_WEIGHT;

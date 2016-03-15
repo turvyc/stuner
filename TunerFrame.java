@@ -11,10 +11,17 @@ import javax.swing.JPanel;
 
 public class TunerFrame extends JFrame implements Observer {
 
+    final int CENT_THRESHOLD = 10;
+
     String TITLE_TEXT = "sTuner";
     String STEP_BUTTON_TEXT = "Next string";
     String AUTO_BUTTON_TEXT = "Auto mode";
-    final int CENT_THRESHOLD = 10;
+    String LOW_E_TEXT = "E";
+    String A_TEXT = "A";
+    String D_TEXT = "D";
+    String G_TEXT = "G";
+    String B_TEXT = "B";
+    String HIGH_E_TEXT = "E";
     
     // GUI components
     JButton stepButton;
@@ -48,8 +55,28 @@ public class TunerFrame extends JFrame implements Observer {
         }
     }
 
+
     public void setCurrentString(PitchComparator.GuitarString s) {
-        // TODO Switch statement for GuitarString values
+        switch (s) {
+            case E1:
+                stringLabel.setText(LOW_E_TEXT);
+                break;
+            case A:
+                stringLabel.setText(A_TEXT);
+                break;
+            case D:
+                stringLabel.setText(D_TEXT);
+                break;
+            case G:
+                stringLabel.setText(G_TEXT);
+                break;
+            case B:
+                stringLabel.setText(B_TEXT);
+                break;
+            case E6:
+                stringLabel.setText(HIGH_E_TEXT);
+                break;
+        }
     }
 
     private void setupLabels() {

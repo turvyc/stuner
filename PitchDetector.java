@@ -19,6 +19,8 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+
+
 public class PitchDetector {
 	
     private static float sampleRate;
@@ -102,44 +104,11 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     public static float[] convToFloat(byte [] byteArr){
     	
-        // Convert byte[] to short[]
-        ShortBuffer sbuf = ByteBuffer.wrap(byteArr).asShortBuffer();
-        short[] audioShorts = new short[sbuf.capacity()];
-        sbuf.get(audioShorts);
-
-        
-        // short[] to float[]
-        float[] audioFloats = new float[audioShorts.length];
-
-        for (int i = 0; i < audioShorts.length; i++) {
-            audioFloats[i] = ((float)Short.reverseBytes(audioShorts[i])/0x8000);
-        }
-        
-        return audioFloats;
     	
-
-    	/*
-    	
-    	// Convert bytes to short
-        short[] shortArr = new short[byteArr.length / 2];
-        ByteBuffer byteBuffer = ByteBuffer.wrap(byteArr);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArr);
-       
-        // Cast short to float
-        float[] floatOut = new float[shortArr.length];
-        for (int i = 0; i < shortArr.length; i++) {
-            floatOut[i] = shortArr[i]; 
-        }
-        return floatOut;
-        
-        */
-        
-    	
-    	/*
-        ByteArrayInputStream bas = new ByteArrayInputStream(source);    
+        ByteArrayInputStream bas = new ByteArrayInputStream(byteArr);    
         DataInputStream ds = new DataInputStream(bas);
         
-        float[] fArr = new float[source.length / 4];  // 4 bytes per float
+        float[] fArr = new float[byteArr.length / 4];  // 4 bytes per float
         
         for (int i = 0; i < fArr.length; i++){
         
@@ -154,7 +123,7 @@ public class PitchDetector {
         }
   
         return fArr;
-        */  
+          
     }
     
     

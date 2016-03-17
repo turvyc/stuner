@@ -3,11 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package pitchdetector;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,21 +26,27 @@ public class PitchDetector {
     private static int channels;
     private boolean signed;
     private boolean bigEndian;
+    
+    private int bufferSize;
+    private int bytesPerFrame;
         
-    boolean stopped;
-    int numBytesRead;
-    float [] f_buffer;
+    private boolean stopped;
+    private int numBytesRead;
 		
     //-------------------------------------------------------------------------	
     public PitchDetector(){
 		
         sampleRate = 8000.0f;                                                   //8000, 11025, 16000, 22050, 44100    - samples/sec
-        sampleSizeInBits = 16;                                                  // 8, 16
-        channels = 1;                                                           // 1 - mono, 2-stereo
+        sampleSizeInBits = 16;                                                  // 8, 16-audio CD quality
+        channels = 1;                                                           // 1-mono, 2-stereo
         signed = true;                                                          
-        bigEndian = false;
+        bigEndian = false;														// using littleEndian. ByteBuffer (bigEndian)
         
-        stopped = false;	
+        bufferSize = 512;
+        bytesPerFrame = 1;
+        
+        stopped = false;
+        numBytesRead = 0;
     }
 	
 	
@@ -46,34 +54,42 @@ public class PitchDetector {
     public void captureAudio(){
 
         AudioFormat format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);                      
-        TargetDataLine line = null;
+        TargetDataLine microphone = null;
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format); // format is an AudioFormat object
+
+        
         
         if (!AudioSystem.isLineSupported(info)) {
             System.out.print("\nAudio Line not supported");
             System.exit(-1);
         }
 
+        // ----- OPEN microphone
         try {
-            line = (TargetDataLine) AudioSystem.getLine(info);
-            line.open(format);
+            microphone = (TargetDataLine) AudioSystem.getLine(info);
+            microphone.open(format);
+            
         } catch (LineUnavailableException ex) {
             System.out.print("\nLine Unavailable: " + ex + "\n");
             System.exit(-2);
         }
-                     
-        byte[] buffer = new byte[line.getBufferSize() / 5];        
-        f_buffer = new float[buffer.length / 4];                                // 4 bytes = 1 float
+        
+        int numBytes = bufferSize * bytesPerFrame;
+        
+        byte[] audioBytes = new byte[numBytes];        
+        float [] audioFloats = new float[audioBytes.length / 4];                                // 4 bytes = 1 float
 
-        line.start();
+        
+        microphone.start();
 
+        // --- READ data
         while (!stopped) {
     	 
-            numBytesRead =  line.read(buffer, 0, buffer.length);            
-            printBuffer(buffer);                                                // DEBUG LINE
+            numBytesRead =  microphone.read(audioBytes, 0, audioBytes.length);            
+            printBuffer(audioBytes);                                                // DEBUG LINE
                         
-            f_buffer = convToFloat(buffer);
-            printFBuffer(f_buffer);                                             // DEBUG LINE
+            audioFloats = convToFloat(audioBytes);
+            printFBuffer(audioFloats);                                             // DEBUG LINE
                                                
         }          
     }
@@ -84,17 +100,52 @@ public class PitchDetector {
     // @param:  source  - the byte array to be converted
     // @return: fArr    - float array with converted values  
     //-------------------------------------------------------------------------
-    public static float[] convToFloat(byte [] source){
+    public static float[] convToFloat(byte [] byteArr){
+    	
+        // Convert byte[] to short[]
+        ShortBuffer sbuf = ByteBuffer.wrap(byteArr).asShortBuffer();
+        short[] audioShorts = new short[sbuf.capacity()];
+        sbuf.get(audioShorts);
 
-        ByteArrayInputStream bas = new ByteArrayInputStream(source);
-    
+        
+        // short[] to float[]
+        float[] audioFloats = new float[audioShorts.length];
+
+        for (int i = 0; i < audioShorts.length; i++) {
+            audioFloats[i] = ((float)Short.reverseBytes(audioShorts[i])/0x8000);
+        }
+        
+        return audioFloats;
+    	
+
+    	/*
+    	
+    	// Convert bytes to short
+        short[] shortArr = new short[byteArr.length / 2];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(byteArr);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArr);
+       
+        // Cast short to float
+        float[] floatOut = new float[shortArr.length];
+        for (int i = 0; i < shortArr.length; i++) {
+            floatOut[i] = shortArr[i]; 
+        }
+        return floatOut;
+        
+        */
+        
+    	
+    	/*
+        ByteArrayInputStream bas = new ByteArrayInputStream(source);    
         DataInputStream ds = new DataInputStream(bas);
+        
         float[] fArr = new float[source.length / 4];  // 4 bytes per float
         
         for (int i = 0; i < fArr.length; i++){
         
             try {
                 fArr[i] = ds.readFloat();
+                
             } catch (IOException ex) {
                 Logger.getLogger(PitchDetector.class.getName()).log(Level.SEVERE, null, ex);
                 System.out.print("\nI/O Exception: " + ex);
@@ -102,7 +153,8 @@ public class PitchDetector {
             }
         }
   
-        return fArr;  
+        return fArr;
+        */  
     }
     
     

@@ -99,11 +99,33 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     // This method accepts byte array, converts its values to float (4 bytes = 1 float) and 
     //             returns float array with converted values.
-    // @param:  source  - the byte array to be converted
+    // @param:  byteArr  - the byte array to be converted
     // @return: fArr    - float array with converted values  
     //-------------------------------------------------------------------------
     public static float[] convToFloat(byte [] byteArr){
-    	
+
+        
+        /*
+        
+        final int BYTES_PER_FLOAT = 4;
+        final int BITS_PER_BYTE = 8;
+
+        float[] audioFloats = new float[byteArr.length / BYTES_PER_FLOAT];
+
+        for (int i = 0; i < audioFloats.length; i++) {
+            int result = 0;
+            for (int j = 0; j < BYTES_PER_FLOAT; j++) {
+                int tmp = byteArr[(i * BYTES_PER_FLOAT) + j];
+                tmp = tmp << j * BITS_PER_BYTE;
+                result = result | tmp;
+            }
+            audioFloats[i] = Float.intBitsToFloat(result);
+
+        }
+        return audioFloats;
+
+        */
+
     	
         ByteArrayInputStream bas = new ByteArrayInputStream(byteArr);    
         DataInputStream ds = new DataInputStream(bas);
@@ -123,7 +145,7 @@ public class PitchDetector {
         }
   
         return fArr;
-          
+
     }
     
     

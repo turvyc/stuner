@@ -10,90 +10,25 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.TargetDataLine;
-
-
+import org.jtransforms.fft.FloatFFT_1D;
 
 public class PitchDetector {
-	
-    private static float sampleRate;
-    private static int sampleSizeInBits;
-    private static int channels;
-    private boolean signed;
-    private boolean bigEndian;
-    
-    private int bufferSize;
-    private int bytesPerFrame;
-        
+
     private boolean stopped;
     private int numBytesRead;
-		
-    //-------------------------------------------------------------------------	
-    public PitchDetector(){
-		
-        sampleRate = 8000.0f;                                                   //8000, 11025, 16000, 22050, 44100    - samples/sec
-        sampleSizeInBits = 16;                                                  // 8, 16-audio CD quality
-        channels = 1;                                                           // 1-mono, 2-stereo
-        signed = true;                                                          
-        bigEndian = false;														// using littleEndian. ByteBuffer (bigEndian)
-        
-        bufferSize = 512;
-        bytesPerFrame = 1;
-        
-        stopped = false;
-        numBytesRead = 0;
-    }
-	
-	
+
+    private final int FUNDAMENTAL_FREQUENCY_INDEX = 1;
+
     //-------------------------------------------------------------------------
-    public void captureAudio(){
-
-        AudioFormat format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);                      
-        TargetDataLine microphone = null;
-        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format); // format is an AudioFormat object
-
-        
-        
-        if (!AudioSystem.isLineSupported(info)) {
-            System.out.print("\nAudio Line not supported");
-            System.exit(-1);
-        }
-
-        // ----- OPEN microphone
-        try {
-            microphone = (TargetDataLine) AudioSystem.getLine(info);
-            microphone.open(format);
-            
-        } catch (LineUnavailableException ex) {
-            System.out.print("\nLine Unavailable: " + ex + "\n");
-            System.exit(-2);
-        }
-        
-        int numBytes = bufferSize * bytesPerFrame;
-        
-        byte[] audioBytes = new byte[numBytes];        
-        float [] audioFloats = new float[audioBytes.length / 4];                                // 4 bytes = 1 float
-
-        
-        microphone.start();
-
-        // --- READ data
-        while (!stopped) {
-    	 
-            numBytesRead =  microphone.read(audioBytes, 0, audioBytes.length);            
-            printBuffer(audioBytes);                                                // DEBUG LINE
-                        
-            audioFloats = convToFloat(audioBytes);
-            printFBuffer(audioFloats);                                             // DEBUG LINE
-                                               
-        }          
+    public float getPitch(byte[] audioBytes) {
+        float[] audioFloats = convToFloat(audioBytes);
+        printBuffer(audioBytes);
+        printFBuffer(audioFloats);
+        FloatFFT_1D fft = new FloatFFT_1D(audioFloats.length);
+        fft.realForward(audioFloats);
+        System.out.print("\nafter fft: ");
+        printFBuffer(audioFloats);
+        return audioFloats[FUNDAMENTAL_FREQUENCY_INDEX];
     }
 		    
     //-------------------------------------------------------------------------
@@ -104,7 +39,6 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     public static float[] convToFloat(byte [] byteArr){
 
-        
         /*
         
         final int BYTES_PER_FLOAT = 4;
@@ -125,7 +59,6 @@ public class PitchDetector {
         return audioFloats;
 
         */
-
     	
         ByteArrayInputStream bas = new ByteArrayInputStream(byteArr);    
         DataInputStream ds = new DataInputStream(bas);
@@ -138,16 +71,13 @@ public class PitchDetector {
                 fArr[i] = ds.readFloat();
                 
             } catch (IOException ex) {
-                Logger.getLogger(PitchDetector.class.getName()).log(Level.SEVERE, null, ex);
                 System.out.print("\nI/O Exception: " + ex);
                 System.exit(-2);
             }
         }
   
         return fArr;
-
     }
-    
     
     // DEBUG HELPERS
     //-------------------------------------------------------------------------
@@ -160,8 +90,6 @@ public class PitchDetector {
         }			
     }
     
-    
-    
     public void printFBuffer(float[] bfr){
 		
         System.out.print("\n\nFloat Buffer size:" + bfr.length + "\n");
@@ -170,24 +98,4 @@ public class PitchDetector {
         	System.out.print(" " + bfr[i]);
         }			
     }
-    
-    
-	
-	
-	
-	
-	
-    
-    // ENABLED FOR UNIT TESTING	
-    //-------------------------------------------------------------------------
-    public static void main(String args[]){
-		
-	PitchDetector p1 = new PitchDetector();
-	p1.captureAudio();
-		
-		
-    }
-    
-   
-    
 }

@@ -6,7 +6,7 @@ import javax.sound.sampled.TargetDataLine;
 
 public class STuner {
 
-    private static int bufferSize = 512;
+    private static int bufferSize = 16;
     private static int bytesPerFrame = 1;
 
     public static void main(String args[]) {
@@ -16,12 +16,14 @@ public class STuner {
         TargetDataLine microphone = getMicrophone();
 
         byte[] audioBytes = new byte[bufferSize * bytesPerFrame];
+        microphone.start();
 
         while (true) {
             microphone.read(audioBytes, 0, audioBytes.length);
-            double pitch = detector.getPitch(audioBytes);
+            float pitch = detector.getPitch(audioBytes);
             // compare
             // update GUI
+            // System.out.println(pitch);
         }
     }
 

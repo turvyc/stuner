@@ -97,49 +97,36 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     // This method accepts byte array, converts its values to float (4 bytes = 1 float) and 
     //             returns float array with converted values.
-    // @param:  source  - the byte array to be converted
+    // @param:  byteArr  - the byte array to be converted
     // @return: fArr    - float array with converted values  
     //-------------------------------------------------------------------------
     public static float[] convToFloat(byte [] byteArr){
-    	
-        // Convert byte[] to short[]
-        ShortBuffer sbuf = ByteBuffer.wrap(byteArr).asShortBuffer();
-        short[] audioShorts = new short[sbuf.capacity()];
-        sbuf.get(audioShorts);
-
         
-        // short[] to float[]
-        float[] audioFloats = new float[audioShorts.length];
+        /*
+        
+        final int BYTES_PER_FLOAT = 4;
+        final int BITS_PER_BYTE = 8;
 
-        for (int i = 0; i < audioShorts.length; i++) {
-            audioFloats[i] = ((float)Short.reverseBytes(audioShorts[i])/0x8000);
+        float[] audioFloats = new float[byteArr.length / BYTES_PER_FLOAT];
+
+        for (int i = 0; i < audioFloats.length; i++) {
+            int result = 0;
+            for (int j = 0; j < BYTES_PER_FLOAT; j++) {
+                int tmp = byteArr[(i * BYTES_PER_FLOAT) + j];
+                tmp = tmp << j * BITS_PER_BYTE;
+                result = result | tmp;
+            }
+            audioFloats[i] = Float.intBitsToFloat(result);
+
         }
-        
         return audioFloats;
-    	
 
-    	/*
-    	
-    	// Convert bytes to short
-        short[] shortArr = new short[byteArr.length / 2];
-        ByteBuffer byteBuffer = ByteBuffer.wrap(byteArr);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortArr);
-       
-        // Cast short to float
-        float[] floatOut = new float[shortArr.length];
-        for (int i = 0; i < shortArr.length; i++) {
-            floatOut[i] = shortArr[i]; 
-        }
-        return floatOut;
-        
         */
-        
     	
-    	/*
-        ByteArrayInputStream bas = new ByteArrayInputStream(source);    
+        ByteArrayInputStream bas = new ByteArrayInputStream(byteArr);    
         DataInputStream ds = new DataInputStream(bas);
         
-        float[] fArr = new float[source.length / 4];  // 4 bytes per float
+        float[] fArr = new float[byteArr.length / 4];  // 4 bytes per float
         
         for (int i = 0; i < fArr.length; i++){
         
@@ -154,7 +141,6 @@ public class PitchDetector {
         }
   
         return fArr;
-        */  
     }
     
     

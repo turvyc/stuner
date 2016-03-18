@@ -9,6 +9,12 @@ public class STuner {
     private static int bufferSize = 512;
     private static int bytesPerFrame = 1;
 
+    public static float sampleRate = 8000.0f;
+    public static int sampleSizeInBits = 16;
+    public static int channels = 1;
+    public static boolean signed = true;
+    public static boolean bigEndian = false;
+
     public static void main(String args[]) {
         TunerFrame frame = new TunerFrame();
         frame.setVisible(true);
@@ -28,11 +34,6 @@ public class STuner {
     }
 
     private static TargetDataLine getMicrophone() {
-        float sampleRate = 8000.0f;
-        int sampleSizeInBits = 16;
-        int channels = 1;
-        boolean signed = true;
-        boolean bigEndian = false;
 
         AudioFormat format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);                      
         TargetDataLine mic = null;

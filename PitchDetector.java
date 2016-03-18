@@ -22,12 +22,8 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     public float getPitch(byte[] audioBytes) {
         float[] audioFloats = convToFloat(audioBytes);
-        printBuffer(audioBytes);
-        printFBuffer(audioFloats);
         FloatFFT_1D fft = new FloatFFT_1D(audioFloats.length);
         fft.realForward(audioFloats);
-        System.out.print("\nafter fft: ");
-        printFBuffer(audioFloats);
         return audioFloats[FUNDAMENTAL_FREQUENCY_INDEX];
     }
 		    
@@ -68,7 +64,7 @@ public class PitchDetector {
         for (int i = 0; i < fArr.length; i++){
         
             try {
-                fArr[i] = ds.readFloat();
+                fArr[i] = (float) ds.readShort();
                 
             } catch (IOException ex) {
                 System.out.print("\nI/O Exception: " + ex);

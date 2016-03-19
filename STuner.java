@@ -26,10 +26,10 @@ public class STuner {
 
         while (true) {
             microphone.read(audioBytes, 0, audioBytes.length);
-            float pitch = detector.getPitch(audioBytes);
+            float pitch = detector.getPitch(audioBytes, sampleRate);
             // compare
             // update GUI
-            System.out.println(pitch);
+            // System.out.println(pitch);
         }
     }
 

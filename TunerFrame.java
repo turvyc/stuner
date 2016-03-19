@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -13,6 +15,7 @@ public class TunerFrame extends JFrame implements Observer {
 
     final int CENT_THRESHOLD = 10;
 
+    // GUI Text
     String TITLE_TEXT = "sTuner";
     String STEP_BUTTON_TEXT = "Next string";
     String AUTO_BUTTON_TEXT = "Auto mode";
@@ -22,7 +25,7 @@ public class TunerFrame extends JFrame implements Observer {
     String G_TEXT = "G";
     String B_TEXT = "B";
     String HIGH_E_TEXT = "E";
-    
+
     // GUI components
     JButton stepButton;
     JButton autoButton;
@@ -45,13 +48,14 @@ public class TunerFrame extends JFrame implements Observer {
         int cents = (Integer) arg;
         centLabel.setText(String.format("%d", cents));
         if (Math.abs(cents) < CENT_THRESHOLD) {
-            // TODO Light both indicators
+            sharpIndicator.setBackground(Color.red);
+            flatIndicator.setBackground(Color.red);
         }
         else if (cents < 0) {
-            // TODO Change flat indicator label
+            flatIndicator.setBackground(Color.red);
         }
         else if (cents > 0) {
-            // TODO Change sharp indicator label
+            sharpIndicator.setBackground(Color.red);
         }
     }
 
@@ -84,10 +88,11 @@ public class TunerFrame extends JFrame implements Observer {
         String FLAT_SIGN = "\u266d";
         String SHARP_SIGN = "\u266f";
         Dimension INDICATOR_SIZE = new Dimension(25, 25);
+        Border border = LineBorder.createBlackLineBorder();
 
         flatIndicator = new JLabel();
         flatIndicator.setOpaque(true);
-        flatIndicator.setBackground(Color.red);
+        flatIndicator.setBorder(border);
         flatIndicator.setPreferredSize(INDICATOR_SIZE); 
 
         flatLabel = new JLabel();
@@ -96,7 +101,7 @@ public class TunerFrame extends JFrame implements Observer {
 
         sharpIndicator = new JLabel();
         sharpIndicator.setOpaque(true);
-        sharpIndicator.setBackground(Color.red);
+        sharpIndicator.setBorder(border);
         sharpIndicator.setPreferredSize(INDICATOR_SIZE); 
 
         sharpLabel = new JLabel();

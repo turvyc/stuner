@@ -62,6 +62,7 @@ public class PitchDetector {
         return pitch;
     }
     
+    /*
     //-------------------------------------------------------------------------
     // This method accepts byte array, converts its values to float (4 bytes = 1 float) and 
     //             returns float array with converted values.
@@ -87,6 +88,22 @@ public class PitchDetector {
         }
   
         return fArr;
+    }
+
+    */
+
+    public static float[] convToFloat(byte[] byteArr) {
+        float[] floatArr = new float[byteArr.length / 2];
+        for (int i = 0; i < floatArr.length; i++)
+            floatArr[i] = (float) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);
+        return floatArr;
+    }
+    
+    public static void main(String[] args) {
+        byte[] arr = {0x01, 0x23, 0x45, 0x67};
+        printBuffer(arr);
+        printFBuffer(convToFloat2(arr));
+        
     }
     
     /*
@@ -118,21 +135,23 @@ public class PitchDetector {
     
     // DEBUG HELPERS
     //-------------------------------------------------------------------------
-    public void printBuffer(byte[] bfr){
+    public static void printBuffer(byte[] bfr){
 		
-        System.out.print("\nByte Buffer:");
+        System.out.print("Byte Buffer:");
         
         for(int i = 0; i < bfr.length; i++){        	
         	System.out.print(" " + bfr[i]);
         }			
+        System.out.println();
     }
     
-    public void printFBuffer(float[] bfr, String msg){
+    public static void printFBuffer(float[] bfr){
 		
-        System.out.print("\n\nFloat Buffer size:" + msg + bfr.length + "\n");
+        System.out.print("Float Buffer size:" + bfr.length + "\n");
         
         for(int i = 0; i < bfr.length; i++){        	
         	System.out.print(" " + bfr[i]);
         }			
+        System.out.println();
     }
 }

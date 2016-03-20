@@ -15,11 +15,11 @@ import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.fft.FloatFFT_1D;
 
 public class PitchDetector {
-	
+		
     //-------------------------------------------------------------------------
-    public float getPitch(byte[] audioBytes, float sampleRate) {
+    public double getPitch(byte[] audioBytes, float sampleRate) {
     	
-    	double pitch = 0.0d;
+    	double pitch = 0.0d;    	
     	int sRate = (int) sampleRate;
     	
     	// short[] audioShorts = convToShort(audioBytes);
@@ -31,17 +31,20 @@ public class PitchDetector {
   
         FloatFFT_1D fft = new FloatFFT_1D(audioFloats.length);        
         fft.realForward(audioFloats);
+        //printFBuffer(audioFloats, "(After FFT): ");
 
-        
         /* find the peak magnitude and it's index */
-        int maxIndex = 2;
-        double maxMagnitude = 0.0d;
-        double magnitude = 0.0d; 
+        int maxIndex = -1;
+        double maxMagnitude = Double.NEGATIVE_INFINITY;
+        double magnitude; 
 
         for(int i = 2; i < audioFloats.length; i+=2 ) {
 
         	// get magnitude
-        	magnitude = Math.sqrt(audioFloats[i] * audioFloats[i] + audioFloats[i+1] * audioFloats[i+1]);
+        	magnitude = 
+        	Math.sqrt( (double) audioFloats[i] * audioFloats[i] + audioFloats[i+1] * audioFloats[i+1] );
+        	
+        	// System.out.print("\nMagnitude: " + magnitude);
         	
         	// compare current magnitude to max magnitude        	
             if(magnitude > maxMagnitude) {
@@ -50,24 +53,15 @@ public class PitchDetector {
             }
         }
         
+        System.out.print("\nMaxMag: " + maxMagnitude + "   ");
+        System.out.print("       ,k index: " + maxIndex/2 + "   ");
         
-        
-        
-        pitch =  ((double) sampleRate * (maxIndex/2) / (audioFloats.length));
-        
-        
-        
-        
-        
-        // printFBuffer(audioFloats, "(After FFT): ");   
-        System.out.print("\nPitch: " + pitch);
+        pitch =  ((double) sampleRate * (maxIndex/2) / (audioFloats.length));           
+        System.out.print("       Pitch: " + pitch);
 
-        return (float) pitch;
-  
+        return pitch;
     }
     
-
-	    
     //-------------------------------------------------------------------------
     // This method accepts byte array, converts its values to float (4 bytes = 1 float) and 
     //             returns float array with converted values.
@@ -126,7 +120,7 @@ public class PitchDetector {
     //-------------------------------------------------------------------------
     public void printBuffer(byte[] bfr){
 		
-        System.out.print("\n\nByte Buffer:\n");
+        System.out.print("\nByte Buffer:");
         
         for(int i = 0; i < bfr.length; i++){        	
         	System.out.print(" " + bfr[i]);

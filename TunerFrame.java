@@ -59,14 +59,16 @@ public class TunerFrame extends JFrame implements Observer {
 
         // Update indicator labels
         if (Math.abs(cents) < CENT_THRESHOLD) {
-            sharpIndicator.setBackground(Color.red);
-            flatIndicator.setBackground(Color.red);
+            sharpIndicator.setBackground(Color.RED);
+            flatIndicator.setBackground(Color.RED);
         }
         else if (cents < 0) {
-            flatIndicator.setBackground(Color.red);
+            sharpIndicator.setBackground(new Color(0, 0, 0, 0));
+            flatIndicator.setBackground(Color.RED);
         }
         else if (cents > 0) {
-            sharpIndicator.setBackground(Color.red);
+            flatIndicator.setBackground(new Color(0, 0, 0, 0));
+            sharpIndicator.setBackground(Color.RED);
         }
     }
 

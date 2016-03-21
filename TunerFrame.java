@@ -13,30 +13,34 @@ import javax.swing.JPanel;
 
 public class TunerFrame extends JFrame implements Observer {
 
-    final int CENT_THRESHOLD = 10;
+    private final int CENT_THRESHOLD = 10;
 
     // GUI Text
-    String TITLE_TEXT = "sTuner";
-    String STEP_BUTTON_TEXT = "Next string";
-    String AUTO_BUTTON_TEXT = "Auto mode";
-    String LOW_E_TEXT = "E";
-    String A_TEXT = "A";
-    String D_TEXT = "D";
-    String G_TEXT = "G";
-    String B_TEXT = "B";
-    String HIGH_E_TEXT = "E";
+    public static String TITLE_TEXT = "sTuner";
+    public static String STEP_BUTTON_TEXT = "Next string";
+    public static String AUTO_BUTTON_TEXT = "Auto mode";
+    public static String LOW_E_TEXT = "E";
+    public static String A_TEXT = "A";
+    public static String D_TEXT = "D";
+    public static String G_TEXT = "G";
+    public static String B_TEXT = "B";
+    public static String HIGH_E_TEXT = "E";
 
     // GUI components
-    JButton stepButton;
-    JButton autoButton;
-    JLabel stringLabel;
-    JLabel centLabel;
-    JLabel flatLabel;
-    JLabel sharpLabel;
-    JLabel flatIndicator;
-    JLabel sharpIndicator;
+    private JButton stepButton;
+    private JButton autoButton;
+    private JLabel stringLabel;
+    private JLabel centLabel;
+    private JLabel flatLabel;
+    private JLabel sharpLabel;
+    private JLabel flatIndicator;
+    private JLabel sharpIndicator;
     
-    public TunerFrame() {
+    // ActionListener
+    private GUIListener listener;
+
+    public TunerFrame(GUIListener l) {
+        listener = l;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(TITLE_TEXT);
         setupLabels();
@@ -45,8 +49,15 @@ public class TunerFrame extends JFrame implements Observer {
     }
 
     public void update(Observable o, Object arg) {
+        // Cast the information from the observable (PitchComparator)
         int cents = (Integer) arg;
+        PitchComparator comparator = (PitchComparator) o;
+
+        // Update text
         centLabel.setText(String.format("%d", cents));
+        setCurrentString(comparator.getCurrentString());
+
+        // Update indicator labels
         if (Math.abs(cents) < CENT_THRESHOLD) {
             sharpIndicator.setBackground(Color.red);
             flatIndicator.setBackground(Color.red);
@@ -60,7 +71,7 @@ public class TunerFrame extends JFrame implements Observer {
     }
 
 
-    public void setCurrentString(PitchComparator.GuitarString s) {
+    private void setCurrentString(PitchComparator.GuitarString s) {
         switch (s) {
             case E1:
                 stringLabel.setText(LOW_E_TEXT);
@@ -165,6 +176,7 @@ public class TunerFrame extends JFrame implements Observer {
 
         // Add the step button
         stepButton = new JButton(STEP_BUTTON_TEXT);
+        stepButton.addActionListener(listener);
         c.gridx = 0;
         c.gridy = 8;
         c.gridwidth = 2;
@@ -172,6 +184,7 @@ public class TunerFrame extends JFrame implements Observer {
 
         // Add the auto button
         autoButton = new JButton(AUTO_BUTTON_TEXT);
+        autoButton.addActionListener(listener);
         c.gridx = 4;
         panel.add(autoButton, c);
 

@@ -1,8 +1,4 @@
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -22,33 +18,35 @@ public class STuner {
     public static boolean bigEndian = false;
 
     public static void main(String args[]) {    	
-        TunerFrame frame = new TunerFrame();
-        frame.setVisible(true);        
-        
-        PitchDetector detector = new PitchDetector();
         TargetDataLine microphone = getMicrophone();        
+        PitchDetector detector = new PitchDetector();
+        PitchComparator comparator = new PitchComparator(); 
+        GUIListener listener = new GUIListener(comparator);
+        TunerFrame frame = new TunerFrame(listener);
+        comparator.addObserver(frame);
+        frame.setVisible(true);        
 
         // --------------------------------------------------------------------
         // USING SOUND FILE
         // --------------------------------------------------------------------
     	int totalFramesRead = 0;
-        File fileIn = new File("146.83Hz.wav");
+        File fileIn = new File("a-note.wav");
         
     	try {
     		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fileIn);
       	  	bytesPerFrame = audioInputStream.getFormat().getFrameSize();
       	  	sampleRate = audioInputStream.getFormat().getSampleRate();
       	  	
-      	  	System.out.print("\n146.83Hz.wav, 5 sec, " + sampleRate + " Hz, 16bit, Bytes per frame: " + bytesPerFrame);			// DEBUG LINE
+      	  	System.out.print("\n146.83Hz.wav, 5 sec, " + sampleRate + 
+                    " Hz, 16bit, Bytes per frame: " + bytesPerFrame);
       	  	
       	  	if (bytesPerFrame == AudioSystem.NOT_SPECIFIED) {
       	  		bytesPerFrame = 1;
       	  	}
       	  	      	  
-      	  
       	  	// Set an arbitrary buffer size of 1024 frames.
       	  	int numBytes = 1024 * bytesPerFrame;
-      	  	System.out.print(", Current buffer size: " + numBytes);								// DEBUG LINE      	  	
+      	  	System.out.print(", Current buffer size: " + numBytes);
       	  	byte[] audioBytes = new byte[numBytes];
       	  
       	  	try {
@@ -76,7 +74,6 @@ public class STuner {
       	} catch (Exception e) {
       		System.out.print("I/O error" + e);
       	}
-    	
     	
         
         // --------------------------------------------------------------------

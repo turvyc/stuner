@@ -57,8 +57,10 @@ public class PitchDetector {
         System.out.print("       ,k index: " + maxIndex/2 + "   ");
         
         pitch =  ((double) sampleRate * (maxIndex/2) / (audioFloats.length));           
-        System.out.print("       Pitch: " + pitch);
+        //System.out.print("       Pitch: " + pitch);
 
+        pitch = ZeroCrossing.calculateZeroCrossings(audioFloats);
+        System.out.println("Pitch: " + pitch);
         return pitch;
     }
     
@@ -102,7 +104,7 @@ public class PitchDetector {
     public static void main(String[] args) {
         byte[] arr = {0x01, 0x23, 0x45, 0x67};
         printBuffer(arr);
-        printFBuffer(convToFloat2(arr));
+        printFBuffer(convToFloat(arr));
         
     }
     

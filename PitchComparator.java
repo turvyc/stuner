@@ -24,6 +24,9 @@ public class PitchComparator extends Observable {
     private int cents;
     // The difference in cents between the input signal and the correct tuning
 
+    private int N_STRINGS = 6;
+    // The number of strings on a guitar
+
     public PitchComparator() {
         // Map the guitar strings to their respective frequency
         tuningMap = new EnumMap<GuitarString, Double>(GuitarString.class);
@@ -58,6 +61,33 @@ public class PitchComparator extends Observable {
 
     public void setCurrentString(GuitarString s) {
         currentString = s;
+        setChanged();
+        notifyObservers(cents);
+    }
+
+    public void stepString() {
+        switch (currentString) {
+            case E1:
+                currentString = GuitarString.A;
+                break;
+            case A:
+                currentString = GuitarString.D;
+                break;
+            case D:
+                currentString = GuitarString.G;
+                break;
+            case G:
+                currentString = GuitarString.B;
+                break;
+            case B:
+                currentString = GuitarString.E6;
+                break;
+            case E6:
+                currentString = GuitarString.E1;
+                break;
+        }
+        setChanged();
+        notifyObservers(cents);
     }
 
     public GuitarString getCurrentString() {

@@ -26,11 +26,12 @@ public class STuner {
         comparator.addObserver(frame);
         frame.setVisible(true);        
 
+        /*
         // --------------------------------------------------------------------
         // USING SOUND FILE
         // --------------------------------------------------------------------
     	int totalFramesRead = 0;
-        File fileIn = new File("a-note.wav");
+        File fileIn = new File("146.83Hz.wav");
         
     	try {
     		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fileIn);
@@ -75,22 +76,20 @@ public class STuner {
       		System.out.print("I/O error" + e);
       	}
     	
-        
+        */
         // --------------------------------------------------------------------
         // USING MICROPHONE
         // --------------------------------------------------------------------
-    	/*
         byte[] audioBytes = new byte[bufferSize * bytesPerFrame];
         microphone.start();
                
         while (true) {
             microphone.read(audioBytes, 0, audioBytes.length);
-            float pitch = detector.getPitch(audioBytes, sampleRate);
+            double pitch = detector.getPitch(audioBytes);
             // compare
             // update GUI
             // System.out.println(pitch);
         }
-        */
   
     }
 

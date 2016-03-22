@@ -8,10 +8,10 @@ import javax.sound.sampled.TargetDataLine;
 
 public class STuner {
 
-    private static int bufferSize = 512;
+    private static int bufferSize = 1024;
     private static int bytesPerFrame = 2;
 
-    public static float sampleRate = 8000.0f;						// frames per second
+    public static int sampleRate = 8000;						// frames per second
     public static int bitDepth = 16;								// sample size in bits
     public static int channels = 1;
     public static boolean signed = true;

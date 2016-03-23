@@ -1,129 +1,89 @@
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 import org.jtransforms.fft.DoubleFFT_1D;
-import org.jtransforms.fft.FloatFFT_1D;
 
 public class PitchDetector {
 		
     public double getPitch(byte[] audioBytes) {
     	
-    	double pitch = 0.0d;    	
-    	int sRate = (int) STuner.sampleRate;
-        float[] audioFloats = convToFloat(audioBytes);
+        // Convert the byte array into the actual sample values
+        double[] samples = convToDouble(audioBytes);
                         
-        int N = 21;
-        
-        // Apply low-pass AVG filter
-        for (int i = 0; i < audioFloats.length - N; i++){
-        
-           float temp_sum = 0.0f;           
-           for (int j = i; j < i+N; j++  )  						// Accumulate         
-               temp_sum += audioFloats[j];                      
-                                  
-            audioFloats[i] = temp_sum / 5;                    
-        }
+        // Use FFT to convert from time domain to frequency domain
+        DoubleFFT_1D fft = new DoubleFFT_1D(samples.length);        
+        fft.realForward(samples);
 
-        // Perform FFT
-        FloatFFT_1D fft = new FloatFFT_1D(audioFloats.length);        
-        fft.realForward(audioFloats);
+        // Determine the harmonic product spectrum
+        double[] hps = getHarmonicProductSpectrum(samples);
 
-        /*
-        // Downsample
-        float[] halfSize = new float[audioFloats.length / 2];
-        float[] thirdSize = new float[audioFloats.length / 3];
+        // Determine the index of the frequency with the maximum magnitude
+        int maxIndex = getMaxIndex(hps);
 
-        for (int i = 0; i < halfSize.length; i += 2) {
-            halfSize[i] = audioFloats[i * 2];
-            halfSize[i + 1] = audioFloats[i * 2 + 1];
-        }
+        // Calculate and return the frequency
+        System.out.println("Pitch: " + STuner.sampleRate * maxIndex / samples.length);
+        return STuner.sampleRate * maxIndex / samples.length;           
+    }
 
-        for (int i = 0; i < thirdSize.length - 1; i += 2) {
-            thirdSize[i] = audioFloats[i * 3];
-            thirdSize[i + 1] = 
-                audioFloats[i * 3 + 1];
-        }
+    private double[] getHarmonicProductSpectrum(double[] samples) {
+        // Downsample the original samples by factors of 2 and 3
+        double[] half = downsample(samples, 2);
+        double[] third = downsample(samples, 3);
 
-        float[] productFloat = new float[thirdSize.length];
-        for (int i = 0; i < thirdSize.length - 1; i += 2) {
+        // Multiply the downsampled arrays together
+        double[] hps = new double[third.length];
+        for (int i = 0; i < hps.length - 1; i += 2) {
             
-            float[] tmp = multiplyComplex(audioFloats[i], audioFloats[i + 1],
-                    halfSize[i], halfSize[i + 1]);
+            double[] tmp = multiplyComplex(samples[i], samples[i + 1],
+                    half[i], half[i + 1]);
             
-            tmp = multiplyComplex(tmp[0], tmp[1], thirdSize[i], thirdSize[i + 1]);
+            tmp = multiplyComplex(tmp[0], tmp[1], third[i], third[i + 1]);
             
-            productFloat[i] = tmp[0];
-            productFloat[i + 1] = tmp[1];
+            hps[i] = tmp[0];
+            hps[i + 1] = tmp[1];
         }
-        */
 
-        // Find the greatest magnitude, which is the fundamental frequency
-        int maxIndex = -1;
-        double maxMagnitude = Double.NEGATIVE_INFINITY;
-        double magnitude; 
+        return hps;
+    }
 
-        for(int i = 2; i < audioFloats.length - 1; i+=2 ) {
+    private double[] downsample(double[] original, int factor) {
+        double[] downsampled = new double[original.length / factor];
 
-        	// get magnitude
-        	magnitude = Math.sqrt(audioFloats[i] * audioFloats[i] + 
-                    audioFloats[i+1] * audioFloats[i+1]);
+        for (int i = 0; i < downsampled.length - 1; i += 2) {
+            downsampled[i] = original[i * factor];
+            downsampled[i + 1] = original[i * factor + 1];
+        }
+
+        return downsampled;
+    }
+
+    private int getMaxIndex(double[] freqs) {
+        int maxIndex = 0;
+        double currentMagnitude, maxMagnitude = 0;
+
+        for(int i = 1; i < freqs.length / 2; i++ ) {
+
+            // Calculate the magnitude of the complex number
+        	currentMagnitude = Math.sqrt(freqs[i * 2] * freqs[i * 2] + 
+                    freqs[i * 2 + 1] * freqs[i * 2 + 1]);
         	
-        	// compare current magnitude to max magnitude        	
-            if(magnitude > maxMagnitude) {
+        	// Compare current magnitude to max magnitude        	
+            if(currentMagnitude > maxMagnitude) {
                 maxIndex = i;
-                maxMagnitude = magnitude;
+                maxMagnitude = currentMagnitude;
             }
         }
-        
-        pitch = (double) STuner.sampleRate * (maxIndex / 2.0) / (double) audioFloats.length;           
-
-                
-        // CRAZY DIRTY ADJUSTING        
-        float D = 4.0f;    														   // +/- Deviation
-        
-        //                       0=E1       1=A        2=D       3=G       4=B       5=E6
-        float freqRangeL[] = { 82.41f-D, 110.0f-D, 146.83f-D, 196.0f-D, 246.94f-D, 329.63f-D };
-        float freqRangeH[] = { 82.41f+D, 110.0f+D, 146.83f+D, 196.0f+D, 246.94f+D, 329.63f+D };
-        
-        boolean match = false;                
-        while (!match){
-                    
-            if (pitch > freqRangeH[2] && pitch < freqRangeL[3])                    // check for 2* E1
-                pitch /= 2;                        
-                        
-            if (pitch > freqRangeH[3] && pitch < freqRangeL[4])                    // check for 2* A
-                pitch /= 2;                        
-                        
-            if (pitch > freqRangeH[4] && pitch < freqRangeL[5])                    // check for 2* D
-                pitch /= 2;                        
-                        
-            if (pitch > freqRangeH[5])                    // check for 2* D
-                pitch /= 2;                        
-                                    
-            match = true;                
-        }
-
-        System.out.println("Pitch: " + pitch);
-        return pitch;
-    }
-    
-    //-------------------------------------------------------------------------
-    public static float[] convToFloat(byte[] byteArr) {
-        float[] floatArr = new float[byteArr.length / 2];
-        for (int i = 0; i < floatArr.length; i++)
-            floatArr[i] = (float) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);
-        return floatArr;
+        return maxIndex;
     }
 
-    //-------------------------------------------------------------------------
-    private float[] multiplyComplex(float r1, float i1, float r2, float i2) {
-        float[] product = new float[2];
+    private double[] convToDouble(byte[] byteArr) {
+        double[] doubleArr = new double[byteArr.length / 2];
+        for (int i = 0; i < doubleArr.length; i++)
+            doubleArr[i] = (double) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);
+        return doubleArr;
+    }
+
+    private double[] multiplyComplex(double r1, double i1, double r2, double i2) {
+        double[] product = new double[2];
         product[0] = r1 * r2 - i1 * i2;
         product[1] = r1 * i2 + i1 * r2;
         return product;
     }    
-
 }

@@ -55,8 +55,11 @@ public class PitchDetector {
     }
 
     private int getMaxIndex(double[] freqs) {
-        int maxIndex = 0;
-        double currentMagnitude, maxMagnitude = 0;
+        int maxIndex, secondIndex, thirdIndex;
+        double currentMagnitude, maxMagnitude, secondMagnitude, thirdMagnitude;
+
+        maxIndex = secondIndex = thirdIndex = 0;
+        currentMagnitude = maxMagnitude = secondMagnitude = thirdMagnitude = 0;
 
         for(int i = 1; i < freqs.length / 2; i++ ) {
 
@@ -66,11 +69,27 @@ public class PitchDetector {
         	
         	// Compare current magnitude to max magnitude        	
             if(currentMagnitude > maxMagnitude) {
+                thirdIndex = secondIndex;
+                thirdMagnitude = secondMagnitude;
+                secondIndex = maxIndex;
+                secondMagnitude = maxMagnitude;
                 maxIndex = i;
                 maxMagnitude = currentMagnitude;
             }
+
+            else if (currentMagnitude > secondMagnitude) {
+                thirdIndex = secondIndex;
+                thirdMagnitude = secondMagnitude;
+                secondIndex = i;
+                secondMagnitude = currentMagnitude;
+            }
+
+            else if (currentMagnitude > thirdMagnitude) {
+                thirdIndex = i;
+                thirdMagnitude = currentMagnitude;
+            }
         }
-        return maxIndex;
+        return Math.min(maxIndex, Math.min(secondIndex, thirdIndex));
     }
 
     private double[] convToDouble(byte[] byteArr) {

@@ -23,18 +23,20 @@ public class PitchDetector {
     }
 
     private double[] getHarmonicProductSpectrum(double[] samples) {
-        // Downsample the original samples by factors of 2 and 3
+        // Downsample the original samples by factors of 2, 3 and 4
         double[] half = downsample(samples, 2);
         double[] third = downsample(samples, 3);
+        double[] ft = downsample(samples, 5);
 
         // Multiply the downsampled arrays together
-        double[] hps = new double[third.length];
+        double[] hps = new double[samples.length];
         for (int i = 0; i < hps.length - 1; i += 2) {
             
             double[] tmp = multiplyComplex(samples[i], samples[i + 1],
                     half[i], half[i + 1]);
             
             tmp = multiplyComplex(tmp[0], tmp[1], third[i], third[i + 1]);
+            tmp = multiplyComplex(tmp[0], tmp[1], ft[i], ft[i + 1]);
             
             hps[i] = tmp[0];
             hps[i + 1] = tmp[1];
@@ -44,9 +46,9 @@ public class PitchDetector {
     }
 
     private double[] downsample(double[] original, int factor) {
-        double[] downsampled = new double[original.length / factor];
+        double[] downsampled = new double[original.length];
 
-        for (int i = 0; i < downsampled.length - 1; i += 2) {
+        for (int i = 0; i < downsampled.length / factor; i += 2) {
             downsampled[i] = original[i * factor];
             downsampled[i + 1] = original[i * factor + 1];
         }

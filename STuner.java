@@ -8,7 +8,7 @@ import javax.sound.sampled.TargetDataLine;
 
 public class STuner {
 
-    private static int bufferSize = 4096;
+    private static int bufferSize = 8192;
     private static int bytesPerFrame = 2;
 
     public static double sampleRate = 8000;						// frames per second
@@ -29,7 +29,8 @@ public class STuner {
         // --------------------------------------------------------------------
         // USING SOUND FILE
         // --------------------------------------------------------------------
-        File fileIn = new File("low-e.wav");
+        /*
+        File fileIn = new File("tune.wav");
         
     	try {
     		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fileIn);
@@ -40,7 +41,8 @@ public class STuner {
       	  		bytesPerFrame = 1;
       	  	}
       	  	      	  
-      	  	byte[] audioBytes = new byte[(int) audioInputStream.getFrameLength() * audioInputStream.getFormat().getFrameSize()];
+      	  	byte[] audioBytes = new byte[(int) audioInputStream.getFrameLength() 
+                * audioInputStream.getFormat().getFrameSize()];
       	  
       	  	try {
                     audioInputStream.read(audioBytes);
@@ -52,8 +54,8 @@ public class STuner {
       	} catch (Exception e) {
             e.printStackTrace();
       	}
+        */
     	
-        /*
         // --------------------------------------------------------------------
         // USING MICROPHONE
         // --------------------------------------------------------------------
@@ -67,7 +69,6 @@ public class STuner {
             // update GUI
             int cent = comparator.comparePitch(pitch);
         }
-        */
     }
 
     private static TargetDataLine getMicrophone() {

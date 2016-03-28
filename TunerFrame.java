@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -6,6 +7,7 @@ import java.util.Observable;
 import java.util.Observer;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,6 +37,7 @@ public class TunerFrame extends JFrame implements Observer {
     private JLabel sharpLabel;
     private JLabel flatIndicator;
     private JLabel sharpIndicator;
+    private WaveComponent waveform;
     
     // ActionListener
     private GUIListener listener;
@@ -44,7 +47,7 @@ public class TunerFrame extends JFrame implements Observer {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(TITLE_TEXT);
         setupLabels();
-        add(setupMainPanel());
+        add(setupMainPanel());        
         pack();
     }
 
@@ -59,8 +62,8 @@ public class TunerFrame extends JFrame implements Observer {
 
         // Update indicator labels
         if (Math.abs(cents) < CENT_THRESHOLD) {
-            sharpIndicator.setBackground(Color.RED);
-            flatIndicator.setBackground(Color.RED);
+            sharpIndicator.setBackground(Color.GREEN);
+            flatIndicator.setBackground(Color.GREEN);
         }
         else if (cents < 0) {
             sharpIndicator.setBackground(new Color(0, 0, 0, 0));
@@ -128,6 +131,10 @@ public class TunerFrame extends JFrame implements Observer {
         stringLabel = new JLabel();
         stringLabel.setFont(stringLabel.getFont().deriveFont(LARGE_FONT_SIZE));
         stringLabel.setText("D");
+        
+        waveform = new WaveComponent(400, 200, 100);
+        waveform.setBorder(BorderFactory.createLineBorder(Color.black));
+        
     }
 
     private JPanel setupMainPanel() {
@@ -135,7 +142,7 @@ public class TunerFrame extends JFrame implements Observer {
         final int PADDING = 3;
 
         JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
+        GridBagConstraints c = new GridBagConstraints();               
             
         // Set the default GridBag settings
         c.weightx = DEFAULT_WEIGHT;
@@ -189,7 +196,17 @@ public class TunerFrame extends JFrame implements Observer {
         autoButton.addActionListener(listener);
         c.gridx = 4;
         panel.add(autoButton, c);
-
+        
+        
+        // Add the Waveform
+        c.gridx = 0;
+        c.gridy = 10;
+        c.gridwidth = 6;
+        c.gridheight = 3;
+        panel.add(waveform, c);
+        
+        
         return panel;
     }
+
 }

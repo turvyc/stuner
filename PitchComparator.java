@@ -2,9 +2,6 @@ import java.util.EnumMap;
 import java.util.Observable;
 
 public class PitchComparator extends Observable {
-
-    public static enum GuitarString {E1, A, D, G, B, E6};
-    // Represents a guitar string
     
     private double[] stringFrequencies = {
         82.41, 110.0, 146.83, 196.0, 246.94, 329.63
@@ -12,11 +9,9 @@ public class PitchComparator extends Observable {
     // The fundamental frequencies of an in-tune string, in order of the 
     // values in GuitarString
 
-    private EnumMap<GuitarString, Double> tuningMap;
-    // Maps a GuitarString to its correct fundamental frequency
-
-    private GuitarString currentString;
-    // The current string being tuned
+    private int currentString;
+    // The current string being tuned. Valid values are 0 - 5, representing
+    // E-A-D-G-B-E.
 
     private boolean autoMode;
     // Whether it is in auto mode or not
@@ -28,17 +23,33 @@ public class PitchComparator extends Observable {
     // The number of strings on a guitar
 
     public PitchComparator() {
-        // Map the guitar strings to their respective frequency
-        tuningMap = new EnumMap<GuitarString, Double>(GuitarString.class);
-        for (int i = 0; i < GuitarString.values().length; i++)
-            tuningMap.put(GuitarString.values()[i], stringFrequencies[i]);
-
-        currentString = GuitarString.E1;
+        currentString = 0;
         autoMode = false;
     }
 
     public int comparePitch(double pitch) {
-        cents = calculateCents(pitch, tuningMap.get(currentString));
+        if (autoMode) {
+
+            // Handle edge cases
+            if (pitch <= stringFrequencies[0])
+                currentString = 0;
+            else if (pitch >= stringFrequencies[5])
+                currentString = 5;
+
+            // Find the two strings the pitch is between. (i and i - 1).
+            else {
+                int i = 1;
+                while (pitch > stringFrequencies[i] && i < N_STRINGS)
+                    i++;
+
+                // Find the halfway point between the two string frequencies
+                double halfway = (stringFrequencies[i] + stringFrequencies[i - 1]) / 2;
+
+                currentString = (pitch > halfway) ? i : i - 1;
+            }
+        }
+
+        cents = calculateCents(pitch, stringFrequencies[currentString]);
         setChanged();
         notifyObservers(cents);
         return cents;
@@ -53,44 +64,27 @@ public class PitchComparator extends Observable {
 
     public void setAutoMode(boolean b) {
         autoMode = b;
+        setChanged();
+        notifyObservers(cents);
     }
 
     public boolean isAutoMode() {
         return autoMode;
     }
 
-    public void setCurrentString(GuitarString s) {
-        currentString = s;
+    public void setCurrentString(int string) {
+        currentString = string;
         setChanged();
         notifyObservers(cents);
     }
 
     public void stepString() {
-        switch (currentString) {
-            case E1:
-                currentString = GuitarString.A;
-                break;
-            case A:
-                currentString = GuitarString.D;
-                break;
-            case D:
-                currentString = GuitarString.G;
-                break;
-            case G:
-                currentString = GuitarString.B;
-                break;
-            case B:
-                currentString = GuitarString.E6;
-                break;
-            case E6:
-                currentString = GuitarString.E1;
-                break;
-        }
+        currentString = (currentString + 1) % N_STRINGS;
         setChanged();
         notifyObservers(cents);
     }
 
-    public GuitarString getCurrentString() {
+    public int getCurrentString() {
         return currentString;
     }
 }

@@ -13,6 +13,6 @@ public class GUIListener implements ActionListener {
         if (e.getActionCommand().equals(TunerFrame.STEP_BUTTON_TEXT))
             comparator.stepString();
         if (e.getActionCommand().equals(TunerFrame.AUTO_BUTTON_TEXT))
-            System.out.println("auto");
+            comparator.setAutoMode(! comparator.isAutoMode());
     }
 }

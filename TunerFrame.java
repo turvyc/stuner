@@ -15,7 +15,8 @@ import javax.swing.JPanel;
 
 public class TunerFrame extends JFrame implements Observer {
 
-    private final int CENT_THRESHOLD = 10;
+    private final int IN_TUNE_THRESHOLD = 20;
+    private final int CENT_THRESHOLD = 20;
 
     // GUI Text
     public static String TITLE_TEXT = "sTuner";
@@ -56,12 +57,19 @@ public class TunerFrame extends JFrame implements Observer {
         int cents = (Integer) arg;
         PitchComparator comparator = (PitchComparator) o;
 
+        // If in auto mode, disable "Next String" button
+        stepButton.setEnabled(! comparator.isAutoMode());
+
         // Update text
-        centLabel.setText(String.format("%d", cents));
+        if (Math.abs(cents) > CENT_THRESHOLD)
+            centLabel.setText("-");
+        else
+            centLabel.setText(String.format("%d", cents));
+
         setCurrentString(comparator.getCurrentString());
 
         // Update indicator labels
-        if (Math.abs(cents) < CENT_THRESHOLD) {
+        if (Math.abs(cents) < IN_TUNE_THRESHOLD) {
             sharpIndicator.setBackground(Color.GREEN);
             flatIndicator.setBackground(Color.GREEN);
         }
@@ -76,24 +84,24 @@ public class TunerFrame extends JFrame implements Observer {
     }
 
 
-    private void setCurrentString(PitchComparator.GuitarString s) {
-        switch (s) {
-            case E1:
+    private void setCurrentString(int string) {
+        switch (string) {
+            case 0:
                 stringLabel.setText(LOW_E_TEXT);
                 break;
-            case A:
+            case 1:
                 stringLabel.setText(A_TEXT);
                 break;
-            case D:
+            case 2:
                 stringLabel.setText(D_TEXT);
                 break;
-            case G:
+            case 3:
                 stringLabel.setText(G_TEXT);
                 break;
-            case B:
+            case 4:
                 stringLabel.setText(B_TEXT);
                 break;
-            case E6:
+            case 5:
                 stringLabel.setText(HIGH_E_TEXT);
                 break;
         }

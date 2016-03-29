@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 
 public class TunerFrame extends JFrame implements Observer {
 
-    private final int IN_TUNE_THRESHOLD = 20;
+    private final int IN_TUNE_THRESHOLD = 10;
     private final int CENT_THRESHOLD = 20;
 
     // GUI Text
@@ -60,12 +60,13 @@ public class TunerFrame extends JFrame implements Observer {
         // If in auto mode, disable "Next String" button
         stepButton.setEnabled(! comparator.isAutoMode());
 
-        // Update text
+        // Update cent text
         if (Math.abs(cents) > CENT_THRESHOLD)
             centLabel.setText("-");
         else
             centLabel.setText(String.format("%d", cents));
 
+        // Update current string
         setCurrentString(comparator.getCurrentString());
 
         // Update indicator labels

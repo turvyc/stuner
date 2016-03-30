@@ -18,8 +18,8 @@ public class PitchDetector {
         int maxIndex = getMaxIndex(hps);
 
         // Calculate and return the frequency
-        System.out.println("Pitch: " + STuner.sampleRate * maxIndex / samples.length);
-        return STuner.sampleRate * maxIndex / samples.length;           
+        System.out.println("Pitch: " + STuner.SAMPLE_RATE * maxIndex / samples.length);
+        return STuner.SAMPLE_RATE * maxIndex / samples.length;           
     }
 
     private double[] getHarmonicProductSpectrum(double[] samples) {

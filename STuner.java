@@ -1,4 +1,3 @@
-import java.io.File;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -6,19 +5,40 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+/**
+ * Main class.
+ */
 public class STuner {
 
-    private static int bufferSize = 8192;
-    private static int bytesPerFrame = 2;
+    public static final int SAMPLE_RATE = 8000;
+    // Samples per second
 
-    public static double sampleRate = 8000;						// frames per second
-    public static int bitDepth = 16;								// sample size in bits
-    public static int channels = 1;
-    public static boolean signed = true;
-    public static boolean bigEndian = false;
+    private static final int BUFFER_SIZE = 8192;
+    // Number of samples in the microphone data buffer
 
+    private static final int BYTES_PER_FRAME = 2;
+    // Each sample is 2 bytes or 16 bits
+
+    private static final int BIT_DEPTH = 16;
+    // Sample size in bits
+
+    private static final int CHANNELS = 1;
+    // Mono recording from microphone
+    
+    private static final boolean SIGNED = true;
+    // Data bytes are signed
+
+    private static final boolean BIG_ENDIAN = false;
+    // Data bytes are little endian
+
+    /**
+     * Opens microphone, initializes classes, and runs main loop.
+     */
     public static void main(String args[]) {    	
-        TargetDataLine microphone = getMicrophone();        
+        // Get a line on the microphone
+        TargetDataLine microphone = getMicrophone();
+
+        // Set up application objects
         PitchDetector detector = new PitchDetector();
         PitchComparator comparator = new PitchComparator(); 
         GUIListener listener = new GUIListener(comparator);
@@ -26,57 +46,37 @@ public class STuner {
         comparator.addObserver(frame);
         frame.setVisible(true);        
 
-        // --------------------------------------------------------------------
-        // USING SOUND FILE
-        // --------------------------------------------------------------------
-        /*
-        File fileIn = new File("tune.wav");
-        
-    	try {
-    		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(fileIn);
-      	  	bytesPerFrame = audioInputStream.getFormat().getFrameSize();
-      	  	sampleRate = audioInputStream.getFormat().getSampleRate();
-      	  	
-      	  	if (bytesPerFrame == AudioSystem.NOT_SPECIFIED) {
-      	  		bytesPerFrame = 1;
-      	  	}
-      	  	      	  
-      	  	byte[] audioBytes = new byte[(int) audioInputStream.getFrameLength() 
-                * audioInputStream.getFormat().getFrameSize()];
-      	  
-      	  	try {
-                    audioInputStream.read(audioBytes);
-      	  			double pitch = detector.getPitch(audioBytes);
-      	  		
-      	  	} catch (Exception e) { 
-                e.printStackTrace();
-      	  	}
-      	} catch (Exception e) {
-            e.printStackTrace();
-      	}
-        */
-    	
-        // --------------------------------------------------------------------
-        // USING MICROPHONE
-        // --------------------------------------------------------------------
-        byte[] audioBytes = new byte[bufferSize * bytesPerFrame];
+        // Create array to store audio data from microphone
+        byte[] audioData = new byte[BUFFER_SIZE * BYTES_PER_FRAME];
+
+        // Start the microphone
         microphone.start();
-               
+
+        // Infinite loop, ends when user closes program
         while (true) {
-            microphone.read(audioBytes, 0, audioBytes.length);
-            double pitch = detector.getPitch(audioBytes);
-            
-            // update GUI
+
+            // Read data from the microphone into the audioData array
+            microphone.read(audioData, 0, audioData.length);
+
+            // Get the pitch from the current data
+            double pitch = detector.getPitch(audioData);
+
+            // Compare the pitch with known values (automatically updates GUI)
             int cent = comparator.comparePitch(pitch);
         }
     }
 
+    /**
+     * Sets up microphone.
+     */
     private static TargetDataLine getMicrophone() {
 
-        AudioFormat format = new AudioFormat((float) sampleRate, bitDepth, channels, signed, bigEndian);                      
+        // Prepare the audio format
+        AudioFormat format = new AudioFormat((float) SAMPLE_RATE, BIT_DEPTH, CHANNELS, SIGNED, BIG_ENDIAN);
         TargetDataLine mic = null;
-        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format); // format is an AudioFormat object
-        
+        DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
+
+        // Check that the microphone is supported
         if (!AudioSystem.isLineSupported(info)) {
             System.out.print("\nAudio Line not supported");
             System.exit(-1);
@@ -86,7 +86,7 @@ public class STuner {
         try {
             mic = (TargetDataLine) AudioSystem.getLine(info);
             mic.open(format);
-            
+
         } catch (LineUnavailableException ex) {
             System.out.print("\nLine Unavailable: " + ex + "\n");
             System.exit(-2);
@@ -94,5 +94,4 @@ public class STuner {
 
         return mic;
     }
-   
 }

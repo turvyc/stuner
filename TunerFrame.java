@@ -1,4 +1,3 @@
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -43,8 +42,9 @@ public class TunerFrame extends JFrame implements Observer {
     // ActionListener
     private GUIListener listener;
 
-    public TunerFrame(GUIListener l) {
+    public TunerFrame(GUIListener l, WaveComponent wf) {
         listener = l;
+        waveform = wf;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle(TITLE_TEXT);
         setupLabels();
@@ -140,9 +140,6 @@ public class TunerFrame extends JFrame implements Observer {
         stringLabel = new JLabel();
         stringLabel.setFont(stringLabel.getFont().deriveFont(LARGE_FONT_SIZE));
         stringLabel.setText("D");
-        
-        waveform = new WaveComponent(400, 200, 100);
-        waveform.setBorder(BorderFactory.createLineBorder(Color.black));
         
     }
 

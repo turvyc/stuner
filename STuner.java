@@ -42,8 +42,10 @@ public class STuner {
         PitchDetector detector = new PitchDetector();
         PitchComparator comparator = new PitchComparator(); 
         GUIListener listener = new GUIListener(comparator);
-        TunerFrame frame = new TunerFrame(listener);
+        WaveComponent waveform = new WaveComponent(400, 200, 100);
+        TunerFrame frame = new TunerFrame(listener, waveform);
         comparator.addObserver(frame);
+        detector.addObserver(waveform);
         frame.setVisible(true);        
 
         // Create array to store audio data from microphone

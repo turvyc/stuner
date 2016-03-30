@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;
+import java.util.Observable;
+import java.util.Observer;
 
-/*
 import javax.swing.BorderFactory;
+/*
 import java.awt.GridBagLayout;
 
 // SET IT UP IN THE CLASS WHERE MAIN IS
@@ -43,7 +45,7 @@ import java.awt.GridBagLayout;
 */
 
 //=============================================================================
-public class WaveComponent extends JComponent {
+public class WaveComponent extends JComponent implements Observer {
     public static int y_shift;                                            		
     Vector<Line2D> lines;
 
@@ -53,10 +55,17 @@ public class WaveComponent extends JComponent {
     //			y_sh - down shift Y from the 0,0 origin by this length (moves the x-axis down)
     WaveComponent(int width, int height, int y_sh) {
         super();
+        setBorder(BorderFactory.createLineBorder(Color.black));
         setPreferredSize(new Dimension(width,height));
         lines = new Vector<Line2D>();
         y_shift = y_sh;
         
+    }
+
+    public void update(Observable o, Object arg) {
+        PitchDetector detector = (PitchDetector) o;
+        double[] samples = (double[]) arg;
+        // Do stuff
     }
 
     //-------------------------------------------------------------------------

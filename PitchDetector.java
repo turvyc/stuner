@@ -1,6 +1,7 @@
 import org.jtransforms.fft.DoubleFFT_1D;
+import java.util.Observable;
 
-public class PitchDetector {
+public class PitchDetector extends Observable {
 		
     public double getPitch(byte[] audioBytes) {
     	
@@ -16,6 +17,9 @@ public class PitchDetector {
 
         // Determine the index of the frequency with the maximum magnitude
         int maxIndex = getMaxIndex(hps);
+
+        setChanged();
+        notifyObservers(samples);
 
         // Calculate and return the frequency
         System.out.println("Pitch: " + STuner.SAMPLE_RATE * maxIndex / samples.length);

@@ -31,14 +31,16 @@ public class STuner {
     private static final boolean BIG_ENDIAN = false;
     // Data bytes are little endian
     
-    public static int x_scale = 400;                                            // Set it to the Wavelength Component width 
-    public static int x_jump = BUFFER_SIZE / x_scale;
-    public static int y_scale = 1;                                            // Set it to the 1/2 of the Component height
+    private static final int GRAPH_WIDTH = 500;
+    private static final int GRAPH_HEIGHT = 200;
+    private static final int Y_SHIFT = 100;
+    
+    public static int x_scale = GRAPH_WIDTH;                                  // Set it to the Wavelength Component width 
+    public static int x_jump = BUFFER_SIZE / GRAPH_WIDTH;
+    public static int y_scale = 2;                                            // Set it to the 1/2 of the Component height
     public static int y_divisor = Short.MAX_VALUE / y_scale; 
-    public static int y_shift = 100;
+    public static int y_shift = GRAPH_HEIGHT / 2;
     
-    
-
     /**
      * Opens microphone, initializes classes, and runs main loop.
      */
@@ -50,7 +52,7 @@ public class STuner {
         PitchDetector detector = new PitchDetector();
         PitchComparator comparator = new PitchComparator(); 
         GUIListener listener = new GUIListener(comparator);
-        WaveComponent waveform = new WaveComponent(400, 200, y_shift);
+        WaveComponent waveform = new WaveComponent(GRAPH_WIDTH, GRAPH_HEIGHT, y_shift);
         TunerFrame frame = new TunerFrame(listener, waveform);
         comparator.addObserver(frame);
         //detector.addObserver(waveform);
@@ -60,8 +62,6 @@ public class STuner {
         byte[] audioData = new byte[BUFFER_SIZE * BYTES_PER_FRAME];
         double[] samples = new double[audioData.length / 2];
         
-        x_jump = (samples.length) / x_scale;
-
         // Start the microphone
         microphone.start();
         
@@ -76,16 +76,13 @@ public class STuner {
             // convert audio bytes to samples
             samples = convToDouble(audioData);
             
-            // Get the pitch from the current data
-            double pitch = detector.getPitch(samples);
-            // Compare the pitch with known values (automatically updates GUI)
-            int cent = comparator.comparePitch(pitch);
-            
-            
-            waveform.clear();
-            for ( int i = 1; i < samples.length; i+= x_jump ){    		
-            	waveform.addLine((i/x_jump)-1, -(int)samples[i-1]/y_divisor, i/x_jump, -(int)samples[i]/y_divisor);    		
-            }  
+            // THREAD 1: Process data, get Pitch and Cents
+            ProcessingThread pt = new ProcessingThread(detector, comparator, samples);
+            pt.start();
+                        
+            // THREAD 2: Draw Waveform
+            DrawingThread dt = new DrawingThread(waveform, samples, x_jump, y_divisor);
+            dt.start();        
         }
     }
 
@@ -128,3 +125,60 @@ public class STuner {
         return doubleArr;
     }    
 }
+
+/**
+ * PROCESSING THREAD - Computes the Pitch and Cents
+ */
+class ProcessingThread extends Thread{
+    private double pitch;
+    private int cent;
+    double [] samples;
+    
+    private PitchDetector detector;
+    private PitchComparator pc;
+    
+    public ProcessingThread (PitchDetector d, PitchComparator c, double[] data){
+        pitch = 0.0;
+        cent = 0;
+        samples = data;
+        
+        detector = d;
+        pc = c;                
+    }
+        
+    public void run(){
+        // Get the pitch from the current data
+        double pitch = detector.getPitch(samples);
+        // Compare the pitch with known values (automatically updates GUI)
+        int cent = pc.comparePitch(pitch);            
+    }
+}
+
+/**
+ * DRAWING THREAD - Draws the sound waveform
+ */
+class DrawingThread extends Thread{
+    private WaveComponent wavecomp;
+    double [] data;
+    int x_jump;
+    int y_divisor;
+    
+    public DrawingThread(WaveComponent component, double[] samples, int x_jmp, int y_dvsr){
+        wavecomp = component;
+        data = samples;
+        x_jump = x_jmp;
+        y_divisor = y_dvsr;
+    }
+    
+    public void run(){
+        wavecomp.clear();
+        // Add line to the Graph and repaint
+        for ( int i = 1; i < data.length; i+= x_jump ){    		
+            wavecomp.addLine((i/x_jump)-1, -(int)data[i-1]/y_divisor, i/x_jump, -(int)data[i]/y_divisor);    		
+        }     
+    }
+}
+
+
+
+

@@ -165,7 +165,7 @@ public class TunerFrame extends JFrame implements Observer {
         panel.add(centLabel, c);
 
         // Add the string label
-        c.gridy = 4;
+        c.gridy = 3;
         panel.add(stringLabel, c);
 
         // Add the flat indicator
@@ -193,7 +193,7 @@ public class TunerFrame extends JFrame implements Observer {
         stepButton = new JButton(STEP_BUTTON_TEXT);
         stepButton.addActionListener(listener);
         c.gridx = 0;
-        c.gridy = 8;
+        c.gridy = 10;
         c.gridwidth = 2;
         panel.add(stepButton, c);
 
@@ -206,7 +206,7 @@ public class TunerFrame extends JFrame implements Observer {
         
         // Add the Waveform
         c.gridx = 0;
-        c.gridy = 10;
+        c.gridy = 6;
         c.gridwidth = 6;
         c.gridheight = 3;
         panel.add(waveform, c);

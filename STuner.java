@@ -30,6 +30,14 @@ public class STuner {
 
     private static final boolean BIG_ENDIAN = false;
     // Data bytes are little endian
+    
+    public static int x_scale = 400;                                            // Set it to the Wavelength Component width 
+    public static int x_jump = BUFFER_SIZE / x_scale;
+    public static int y_scale = 1;                                            // Set it to the 1/2 of the Component height
+    public static int y_divisor = Short.MAX_VALUE / y_scale; 
+    public static int y_shift = 100;
+    
+    
 
     /**
      * Opens microphone, initializes classes, and runs main loop.
@@ -42,17 +50,22 @@ public class STuner {
         PitchDetector detector = new PitchDetector();
         PitchComparator comparator = new PitchComparator(); 
         GUIListener listener = new GUIListener(comparator);
-        WaveComponent waveform = new WaveComponent(400, 200, 100);
+        WaveComponent waveform = new WaveComponent(400, 200, y_shift);
         TunerFrame frame = new TunerFrame(listener, waveform);
         comparator.addObserver(frame);
-        detector.addObserver(waveform);
+        //detector.addObserver(waveform);
         frame.setVisible(true);        
 
         // Create array to store audio data from microphone
         byte[] audioData = new byte[BUFFER_SIZE * BYTES_PER_FRAME];
+        double[] samples = new double[audioData.length / 2];
+        
+        x_jump = (samples.length) / x_scale;
 
         // Start the microphone
         microphone.start();
+        
+        System.out.print("\n y_divisor: " + y_divisor);
 
         // Infinite loop, ends when user closes program
         while (true) {
@@ -60,11 +73,19 @@ public class STuner {
             // Read data from the microphone into the audioData array
             microphone.read(audioData, 0, audioData.length);
 
+            // convert audio bytes to samples
+            samples = convToDouble(audioData);
+            
             // Get the pitch from the current data
-            double pitch = detector.getPitch(audioData);
-
+            double pitch = detector.getPitch(samples);
             // Compare the pitch with known values (automatically updates GUI)
             int cent = comparator.comparePitch(pitch);
+            
+            
+            waveform.clear();
+            for ( int i = 1; i < samples.length; i+= x_jump ){    		
+            	waveform.addLine((i/x_jump)-1, -(int)samples[i-1]/y_divisor, i/x_jump, -(int)samples[i]/y_divisor);    		
+            }  
         }
     }
 
@@ -96,4 +117,14 @@ public class STuner {
 
         return mic;
     }
+    
+    /**
+     * Converts audio bytes stream to samples array.
+     */
+    private static double[] convToDouble(byte[] byteArr) {
+        double[] doubleArr = new double[byteArr.length / 2];
+        for (int i = 0; i < doubleArr.length; i++)
+            doubleArr[i] = (double) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);        
+        return doubleArr;
+    }    
 }

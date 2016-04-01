@@ -64,7 +64,7 @@ public class STuner {
             double pitch = detector.getPitch(audioData);
 
             // Compare the pitch with known values (automatically updates GUI)
-            int cent = comparator.comparePitch(pitch);
+            double cent = comparator.comparePitch(pitch);
         }
     }
 

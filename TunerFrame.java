@@ -54,7 +54,7 @@ public class TunerFrame extends JFrame implements Observer {
 
     public void update(Observable o, Object arg) {
         // Cast the information from the observable (PitchComparator)
-        int cents = (Integer) arg;
+        double cents = (Double) arg;
         PitchComparator comparator = (PitchComparator) o;
 
         // If in auto mode, disable "Next String" button
@@ -64,7 +64,7 @@ public class TunerFrame extends JFrame implements Observer {
         if (Math.abs(cents) > CENT_THRESHOLD)
             centLabel.setText("-");
         else
-            centLabel.setText(String.format("%d", cents));
+            centLabel.setText(String.format("%d", (int) cents));
 
         // Update current string
         setCurrentString(comparator.getCurrentString());

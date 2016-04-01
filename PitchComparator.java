@@ -16,7 +16,7 @@ public class PitchComparator extends Observable {
     private boolean autoMode;
     // Whether it is in auto mode or not
 
-    private int cents;
+    private double cents;
     // The difference in cents between the input signal and the correct tuning
 
     private int N_STRINGS = 6;
@@ -27,7 +27,7 @@ public class PitchComparator extends Observable {
         autoMode = false;
     }
 
-    public int comparePitch(double pitch) {
+    public double comparePitch(double pitch) {
         if (autoMode) {
 
             // Handle edge cases
@@ -55,11 +55,11 @@ public class PitchComparator extends Observable {
         return cents;
     }
 
-    private int calculateCents(double a, double b) {
+    private double calculateCents(double a, double b) {
         final int CENT_CONSTANT = 1200;
         final int BASE_2 = 2;
         double ratio = a / b;
-        return (int) (CENT_CONSTANT * (Math.log(ratio) / Math.log(BASE_2)));
+        return (CENT_CONSTANT * (Math.log(ratio) / Math.log(BASE_2)));
     }
 
     public void setAutoMode(boolean b) {

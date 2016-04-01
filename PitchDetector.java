@@ -1,12 +1,12 @@
 import org.jtransforms.fft.DoubleFFT_1D;
 import java.util.Observable;
 
-public class PitchDetector extends Observable {
+public class PitchDetector {  // extends Observable
 		
-    public double getPitch(byte[] audioBytes) {
+    public double getPitch(double[] samples) {
     	
         // Convert the byte array into the actual sample values
-        double[] samples = convToDouble(audioBytes);
+        // double[] samples = convToDouble(audioBytes);
                         
         // Use FFT to convert from time domain to frequency domain
         DoubleFFT_1D fft = new DoubleFFT_1D(samples.length);        
@@ -18,11 +18,11 @@ public class PitchDetector extends Observable {
         // Determine the index of the frequency with the maximum magnitude
         int maxIndex = getMaxIndex(hps);
 
-        setChanged();
-        notifyObservers(samples);
+        //setChanged();
+        //notifyObservers(samples);
 
         // Calculate and return the frequency
-        System.out.println("Pitch: " + STuner.SAMPLE_RATE * maxIndex / samples.length);
+        //System.out.println("Pitch: " + STuner.SAMPLE_RATE * maxIndex / samples.length);
         return STuner.SAMPLE_RATE * maxIndex / samples.length;           
     }
 
@@ -98,12 +98,14 @@ public class PitchDetector extends Observable {
         return Math.min(maxIndex, Math.min(secondIndex, thirdIndex));
     }
 
+    /*
     private double[] convToDouble(byte[] byteArr) {
         double[] doubleArr = new double[byteArr.length / 2];
         for (int i = 0; i < doubleArr.length; i++)
             doubleArr[i] = (double) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);
         return doubleArr;
     }
+    */
 
     private double[] multiplyComplex(double r1, double i1, double r2, double i2) {
         double[] product = new double[2];

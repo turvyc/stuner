@@ -8,6 +8,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,12 +22,12 @@ public class TunerFrame extends JFrame implements Observer {
     public static String TITLE_TEXT = "sTuner";
     public static String STEP_BUTTON_TEXT = "Next string";
     public static String AUTO_BUTTON_TEXT = "Auto mode";
-    public static String LOW_E_TEXT = "E";
+    public static String LOW_E_TEXT = "E6";
     public static String A_TEXT = "A";
     public static String D_TEXT = "D";
     public static String G_TEXT = "G";
     public static String B_TEXT = "B";
-    public static String HIGH_E_TEXT = "E";
+    public static String HIGH_E_TEXT = "E1";
 
     // GUI components
     private JButton stepButton;
@@ -38,6 +39,7 @@ public class TunerFrame extends JFrame implements Observer {
     private JLabel flatIndicator;
     private JLabel sharpIndicator;
     private WaveComponent waveform;
+    private JCheckBox waveCheckBox;
     
     // ActionListener
     private GUIListener listener;
@@ -61,11 +63,12 @@ public class TunerFrame extends JFrame implements Observer {
         stepButton.setEnabled(! comparator.isAutoMode());
 
         // Update cent text
-        if (Math.abs(cents) > CENT_THRESHOLD)
+        if (Math.abs(cents) > CENT_THRESHOLD){
             centLabel.setText("-");
-        else
+        }
+        else{
             centLabel.setText(String.format("%d", (int) cents));
-
+        }
         // Update current string
         setCurrentString(comparator.getCurrentString());
 
@@ -83,7 +86,6 @@ public class TunerFrame extends JFrame implements Observer {
             sharpIndicator.setBackground(Color.RED);
         }
     }
-
 
     private void setCurrentString(int string) {
         switch (string) {
@@ -141,6 +143,8 @@ public class TunerFrame extends JFrame implements Observer {
         stringLabel.setFont(stringLabel.getFont().deriveFont(LARGE_FONT_SIZE));
         stringLabel.setText("D");
         
+        waveCheckBox = new JCheckBox("Enable waveform");
+        waveCheckBox.setSelected(true);
     }
 
     private JPanel setupMainPanel() {
@@ -202,8 +206,7 @@ public class TunerFrame extends JFrame implements Observer {
         autoButton.addActionListener(listener);
         c.gridx = 4;
         panel.add(autoButton, c);
-        
-        
+                
         // Add the Waveform
         c.gridx = 0;
         c.gridy = 6;
@@ -211,7 +214,11 @@ public class TunerFrame extends JFrame implements Observer {
         c.gridheight = 3;
         panel.add(waveform, c);
         
+        c.gridx = 0;
+        c.gridy = 11;
+        panel.add(waveCheckBox, c);
         
+                
         return panel;
     }
 

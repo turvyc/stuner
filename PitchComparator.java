@@ -58,7 +58,7 @@ public class PitchComparator extends Observable {
     private double calculateCents(double a, double b) {
         final int CENT_CONSTANT = 1200;
         final int BASE_2 = 2;
-        double ratio = a / b;
+        double ratio = a / b;              
         return (CENT_CONSTANT * (Math.log(ratio) / Math.log(BASE_2)));
     }
 

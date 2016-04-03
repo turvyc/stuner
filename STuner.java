@@ -31,15 +31,14 @@ public class STuner {
     private static final boolean BIG_ENDIAN = false;
     // Data bytes are little endian
     
-    private static final int GRAPH_WIDTH = 500;
+    private static final int GRAPH_WIDTH = 400;
     private static final int GRAPH_HEIGHT = 200;
-    private static final int Y_SHIFT = 100;
+    private static final int Y_SHIFT = GRAPH_HEIGHT / 2;						// Move the x-axis to the middle of the graph 
     
-    public static int x_scale = GRAPH_WIDTH;                                  // Set it to the Wavelength Component width 
+    public static int x_scale = GRAPH_WIDTH;									// Set it to the Wavelength Component width 
     public static int x_jump = BUFFER_SIZE / GRAPH_WIDTH;
-    public static int y_scale = 2;                                            // Set it to the 1/2 of the Component height
+    public static int y_scale = 2;												// set the y range. Works on Windows, problematic on Linux 
     public static int y_divisor = Short.MAX_VALUE / y_scale; 
-    public static int y_shift = GRAPH_HEIGHT / 2;
     
     /**
      * Opens microphone, initializes classes, and runs main loop.
@@ -52,7 +51,7 @@ public class STuner {
         PitchDetector detector = new PitchDetector();
         PitchComparator comparator = new PitchComparator(); 
         GUIListener listener = new GUIListener(comparator);
-        WaveComponent waveform = new WaveComponent(GRAPH_WIDTH, GRAPH_HEIGHT, y_shift);
+        WaveComponent waveform = new WaveComponent(GRAPH_WIDTH, GRAPH_HEIGHT, Y_SHIFT);
         TunerFrame frame = new TunerFrame(listener, waveform);
         comparator.addObserver(frame);
         //detector.addObserver(waveform);
@@ -150,7 +149,7 @@ class ProcessingThread extends Thread{
         // Get the pitch from the current data
         double pitch = detector.getPitch(samples);
         // Compare the pitch with known values (automatically updates GUI)
-        double cent = pc.comparePitch(pitch);            
+        double cent = pc.comparePitch(pitch);        
     }
 }
 

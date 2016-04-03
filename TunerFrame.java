@@ -39,7 +39,6 @@ public class TunerFrame extends JFrame implements Observer {
     private JLabel flatIndicator;
     private JLabel sharpIndicator;
     private WaveComponent waveform;
-    private JCheckBox waveCheckBox;
     
     // ActionListener
     private GUIListener listener;
@@ -141,10 +140,7 @@ public class TunerFrame extends JFrame implements Observer {
 
         stringLabel = new JLabel();
         stringLabel.setFont(stringLabel.getFont().deriveFont(LARGE_FONT_SIZE));
-        stringLabel.setText("D");
-        
-        waveCheckBox = new JCheckBox("Enable waveform");
-        waveCheckBox.setSelected(true);
+        stringLabel.setText("D");        
     }
 
     private JPanel setupMainPanel() {
@@ -213,12 +209,7 @@ public class TunerFrame extends JFrame implements Observer {
         c.gridwidth = 6;
         c.gridheight = 3;
         panel.add(waveform, c);
-        
-        c.gridx = 0;
-        c.gridy = 11;
-        panel.add(waveCheckBox, c);
-        
-                
+           
         return panel;
     }
 

@@ -30,16 +30,16 @@ public class STuner {
 
     private static final boolean BIG_ENDIAN = false;
     // Data bytes are little endian
-    
+
     private static final int GRAPH_WIDTH = 400;
+    // Width of waveform graph
+
     private static final int GRAPH_HEIGHT = 200;
-    private static final int Y_SHIFT = GRAPH_HEIGHT / 2;						// Move the x-axis to the middle of the graph 
-    
-    public static int x_scale = GRAPH_WIDTH;									// Set it to the Wavelength Component width 
-    public static int x_jump = BUFFER_SIZE / GRAPH_WIDTH;
-    public static int y_scale = 2;												// set the y range. Works on Windows, problematic on Linux 
-    public static int y_divisor = Short.MAX_VALUE / y_scale; 
-    
+    // Height of waveform graph
+
+    private static final int Y_SHIFT = GRAPH_HEIGHT / 2;
+    // Move x-axis to middle of graph
+
     /**
      * Opens microphone, initializes classes, and runs main loop.
      */
@@ -54,7 +54,6 @@ public class STuner {
         WaveComponent waveform = new WaveComponent(GRAPH_WIDTH, GRAPH_HEIGHT, Y_SHIFT);
         TunerFrame frame = new TunerFrame(listener, waveform);
         comparator.addObserver(frame);
-        //detector.addObserver(waveform);
         frame.setVisible(true);        
 
         // Create array to store audio data from microphone
@@ -64,8 +63,6 @@ public class STuner {
         // Start the microphone
         microphone.start();
         
-        System.out.print("\n y_divisor: " + y_divisor);
-
         // Infinite loop, ends when user closes program
         while (true) {
 
@@ -75,18 +72,18 @@ public class STuner {
             // convert audio bytes to samples
             samples = convToDouble(audioData);
 
-            // THREAD 1: Process data, get Pitch and Cents
+            // THREAD 1: Process data, get pitch and cents
             ProcessingThread pt = new ProcessingThread(detector, comparator, samples);
             pt.start();
                         
-            // THREAD 2: Draw Waveform
-            DrawingThread dt = new DrawingThread(waveform, samples, x_jump, y_divisor);
+            // THREAD 2: Draw waveform
+            DrawingThread dt = new DrawingThread(waveform, samples, BUFFER_SIZE / GRAPH_WIDTH, Short.MAX_VALUE / 2);
             dt.start();        
         }
     }
 
     /**
-     * Sets up microphone.
+     * Gets a data line from the microphone.
      */
     private static TargetDataLine getMicrophone() {
 
@@ -115,52 +112,58 @@ public class STuner {
     }
     
     /**
-     * Converts audio bytes stream to samples array.
+     * Converts raw audio byte stream to a double array.
      */
     private static double[] convToDouble(byte[] byteArr) {
-        double[] doubleArr = new double[byteArr.length / 2];
+        final int BYTES_PER_SHORT = 2;
+        final int BYTE_WIDTH = 8;
+        double[] doubleArr = new double[byteArr.length / BYTES_PER_SHORT];
+
+        // Use a bitshift and bitwise OR to cast two-byte shorts into a double
         for (int i = 0; i < doubleArr.length; i++)
-            doubleArr[i] = (double) (byteArr[2 * i + 1] << 8 | byteArr[2 * i]);        
+            doubleArr[i] = (double) (byteArr[2 * i + 1] << BYTE_WIDTH | byteArr[2 * i]);        
+
         return doubleArr;
     }    
 }
 
 /**
- * PROCESSING THREAD - Computes the Pitch and Cents
+ * PROCESSING THREAD - Computes the pitch and cents
  */
-class ProcessingThread extends Thread{
+class ProcessingThread extends Thread {
     private double pitch;
-    private int cent;
-    double [] samples;
+    private int cents;
+    double[] samples;
     
     private PitchDetector detector;
-    private PitchComparator pc;
+    private PitchComparator comparator;
     
     public ProcessingThread (PitchDetector d, PitchComparator c, double[] data){
         pitch = 0.0;
-        cent = 0;
+        cents = 0;
         samples = data;
         
         detector = d;
-        pc = c;                
+        comparator = c;                
     }
         
     public void run(){
         // Get the pitch from the current data
         double pitch = detector.getPitch(samples);
+
         // Compare the pitch with known values (automatically updates GUI)
-        double cent = pc.comparePitch(pitch);        
+        double cents = comparator.comparePitch(pitch);        
     }
 }
 
 /**
  * DRAWING THREAD - Draws the sound waveform
  */
-class DrawingThread extends Thread{
+class DrawingThread extends Thread {
     private WaveComponent wavecomp;
-    double [] data;
-    int x_jump;
-    int y_divisor;
+    private double[] data;
+    private int x_jump;
+    private int y_divisor;
     
     public DrawingThread(WaveComponent component, double[] samples, int x_jmp, int y_dvsr){
         wavecomp = component;
@@ -173,7 +176,8 @@ class DrawingThread extends Thread{
         wavecomp.clear();
         // Add line to the Graph and repaint
         for ( int i = 1; i < data.length; i+= x_jump ){    		
-            wavecomp.addLine((i/x_jump)-1, -(int)data[i-1]/y_divisor, i/x_jump, -(int)data[i]/y_divisor);    		
+            wavecomp.addLine((i / x_jump) - 1, -(int) (data[i - 1] / y_divisor), 
+                    i / x_jump, -(int) (data[i] / y_divisor));    		
         }     
     }
 }

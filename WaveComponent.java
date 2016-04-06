@@ -5,20 +5,17 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Color;
-import java.util.Observable;
-import java.util.Observer;
-
 import javax.swing.BorderFactory;
 
-//=============================================================================
-public class WaveComponent extends JComponent {  // implements Observer
+/**
+ * Displays a graph of the waveform of the incoming audio signal.
+ */
+public class WaveComponent extends JComponent {
     private int y_shift;                                            		
+    // Distance to shift the x-axis up or down
+
     Vector<Line2D> lines;
     
-    //-------------------------------------------------------------------------
-    //
-    // params:	width - component width, height - component height, 
-    //			y_sh - down shift Y from the 0,0 origin by this length (moves the x-axis down)
     WaveComponent(int width, int height, int y_sh) {
         super();
         setBorder(BorderFactory.createLineBorder(Color.black));
@@ -27,18 +24,22 @@ public class WaveComponent extends JComponent {  // implements Observer
         y_shift = y_sh;               
     }
 
-    //-------------------------------------------------------------------------
-    // params:	x1 - start point x, y1 - start point y
-    //    		x2 - end point x,   y2 - end point y
+    /**
+     * Adds a line segment to the vector
+     * @param x1 starting x value
+     * @param x2 ending x value
+     * @param y1 starting y value
+     * @param y2 ending y value
+     */
     public void addLine(double x1, double y1, double x2, double y2) {
-
-    	//System.out.print("\nx1: " + x1 + "  y1: " + y1 + ",  x2: " + x2 + "  y2: " + y2);
         Line2D shape = new Line2D.Double(x1, y1 + y_shift, x2, y2 + y_shift);
         lines.addElement(shape);
         repaint();
     }   
     
-    //-------------------------------------------------------------------------
+    /**
+     * Draws the waveform onto the component.
+     */
     public void paintComponent(Graphics g) {        
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
@@ -50,7 +51,6 @@ public class WaveComponent extends JComponent {  // implements Observer
         }
     }
     
-    //­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­­
     public void clear(){
         lines.clear();
         repaint();

@@ -16,7 +16,10 @@ import javax.swing.JPanel;
 public class TunerFrame extends JFrame implements Observer {
 
     private final int IN_TUNE_THRESHOLD = 10;
+    // Cent values less than this are deemed to be in-tune
+
     private final int CENT_THRESHOLD = 20;
+    // Cent values greater than this are not displayed
 
     // GUI Text
     public static String TITLE_TEXT = "sTuner";
@@ -53,8 +56,11 @@ public class TunerFrame extends JFrame implements Observer {
         pack();
     }
 
+    /**
+     * Called when the Observable object (PitchComparator) calls notifyObservers().
+     */
     public void update(Observable o, Object arg) {
-        // Cast the information from the observable (PitchComparator)
+        // Cast the information from the observable object (PitchComparator)
         double cents = (Double) arg;
         PitchComparator comparator = (PitchComparator) o;
 
@@ -62,12 +68,14 @@ public class TunerFrame extends JFrame implements Observer {
         stepButton.setEnabled(! comparator.isAutoMode());
 
         // Update cent text
-        if (Math.abs(cents) > CENT_THRESHOLD){
+        if (Math.abs(cents) > CENT_THRESHOLD) {
             centLabel.setText("-");
         }
-        else{
+
+        else {
             centLabel.setText(String.format("%d", (int) cents));
         }
+
         // Update current string
         setCurrentString(comparator.getCurrentString());
 
@@ -86,6 +94,9 @@ public class TunerFrame extends JFrame implements Observer {
         }
     }
 
+    /**
+     * Sets the current string text.
+     */
     private void setCurrentString(int string) {
         switch (string) {
             case 0:
@@ -109,6 +120,9 @@ public class TunerFrame extends JFrame implements Observer {
         }
     }
 
+    /**
+     * Helper function for GUI construction.
+     */
     private void setupLabels() {
         final float LARGE_FONT_SIZE = 48.0f;
         String FLAT_SIGN = "\u266d";
@@ -143,6 +157,9 @@ public class TunerFrame extends JFrame implements Observer {
         stringLabel.setText("D");        
     }
 
+    /**
+     * Helper function for GUI construction.
+     */
     private JPanel setupMainPanel() {
         final double DEFAULT_WEIGHT = 0.5;
         final int PADDING = 3;

@@ -1,6 +1,8 @@
-import java.util.EnumMap;
 import java.util.Observable;
 
+/**
+ * Compares an input pitch with the known pitch of a guitar string.
+ */
 public class PitchComparator extends Observable {
     
     private double[] stringFrequencies = {
@@ -27,9 +29,13 @@ public class PitchComparator extends Observable {
         autoMode = false;
     }
 
+    /**
+     * Compares an input frequency (pitch) with the frequency of the selected
+     * string, and returns the cent difference.
+     */
     public double comparePitch(double pitch) {
+        // If in auto mode, try to guess which string is being tuned
         if (autoMode) {
-
             // Handle edge cases
             if (pitch <= stringFrequencies[0])
                 currentString = 0;
@@ -49,12 +55,19 @@ public class PitchComparator extends Observable {
             }
         }
 
+        // Determine the cent difference
         cents = calculateCents(pitch, stringFrequencies[currentString]);
+
+        // Observable stuff
         setChanged();
         notifyObservers(cents);
+
         return cents;
     }
 
+    /**
+     * Calculates the cent difference between two frequencies.
+     */
     private double calculateCents(double a, double b) {
         final int CENT_CONSTANT = 1200;
         final int BASE_2 = 2;
@@ -62,22 +75,34 @@ public class PitchComparator extends Observable {
         return (CENT_CONSTANT * (Math.log(ratio) / Math.log(BASE_2)));
     }
 
+    /**
+     * Enables or disables auto mode.
+     */
     public void setAutoMode(boolean b) {
         autoMode = b;
         setChanged();
         notifyObservers(cents);
     }
 
+    /**
+     * Returns the value of autoMode.
+     */
     public boolean isAutoMode() {
         return autoMode;
     }
 
+    /**
+     * Sets the string currently being tuned.
+     */
     public void setCurrentString(int string) {
         currentString = string;
         setChanged();
         notifyObservers(cents);
     }
 
+    /**
+     * Increments the current string being tuned (1 -> 6)
+     */
     public void stepString() {
         currentString = (currentString + 1) % N_STRINGS;
         setChanged();

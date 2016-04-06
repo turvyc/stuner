@@ -69,15 +69,14 @@ public class PitchDetector {
     }
 
     /**
-     * Determines the indices of the three greatest frequencies, and returns
-     * the smallest one.
+     * Determines the index with the greatest magnitude.
      */
     private int getMaxIndex(double[] freqs) {
-        int maxIndex, secondIndex, thirdIndex;
-        double currentMagnitude, maxMagnitude, secondMagnitude, thirdMagnitude;
+        int maxIndex;
+        double currentMagnitude, maxMagnitude;
 
-        maxIndex = secondIndex = thirdIndex = 0;
-        currentMagnitude = maxMagnitude = secondMagnitude = thirdMagnitude = 0;
+        maxIndex = 0;
+        currentMagnitude = maxMagnitude = 0;
 
         for(int i = 1; i < freqs.length / 2; i++ ) {
 
@@ -87,27 +86,12 @@ public class PitchDetector {
 
             // Compare current magnitude to max magnitude        	
             if(currentMagnitude > maxMagnitude) {
-                thirdIndex = secondIndex;
-                thirdMagnitude = secondMagnitude;
-                secondIndex = maxIndex;
-                secondMagnitude = maxMagnitude;
                 maxIndex = i;
                 maxMagnitude = currentMagnitude;
             }
 
-            else if (currentMagnitude > secondMagnitude) {
-                thirdIndex = secondIndex;
-                thirdMagnitude = secondMagnitude;
-                secondIndex = i;
-                secondMagnitude = currentMagnitude;
-            }
-
-            else if (currentMagnitude > thirdMagnitude) {
-                thirdIndex = i;
-                thirdMagnitude = currentMagnitude;
-            }
         }
-        return Math.min(maxIndex, Math.min(secondIndex, thirdIndex));
+        return maxIndex;
     }
 
     /**

@@ -18,7 +18,7 @@ public class TunerFrame extends JFrame implements Observer {
     private final int IN_TUNE_THRESHOLD = 10;
     // Cent values less than this are deemed to be in-tune
 
-    private final int CENT_THRESHOLD = 20;
+    private final int CENT_THRESHOLD = 50;
     // Cent values greater than this are not displayed
 
     // GUI Text
@@ -79,23 +79,25 @@ public class TunerFrame extends JFrame implements Observer {
         // Update current string
         setCurrentString(comparator.getCurrentString());
 
+
         // Update indicator labels
+        // Color blank = new Color(0, 0, 0, 0);
+        sharpIndicator.setBackground(Color.WHITE);
+        flatIndicator.setBackground(Color.WHITE);
+
         if (Math.abs(cents) < IN_TUNE_THRESHOLD) {
-            sharpIndicator.setOpaque(true);
-            flatIndicator.setOpaque(true);
             sharpIndicator.setBackground(Color.GREEN);
             flatIndicator.setBackground(Color.GREEN);
         }
         else if (cents < 0) {
-            sharpIndicator.setOpaque(false);
-            flatIndicator.setOpaque(true);
             flatIndicator.setBackground(Color.RED);
+            sharpIndicator.setBackground(Color.WHITE);
         }
         else if (cents > 0) {
-            sharpIndicator.setOpaque(true);
-            flatIndicator.setOpaque(false);
+            flatIndicator.setBackground(Color.WHITE);
             sharpIndicator.setBackground(Color.RED);
         }
+
     }
 
     /**

@@ -13,9 +13,13 @@ In Linux, use your favorite shell to navigate to the source directory. Pass the 
 
 ### Run Instructions
 
-Pass the following command:
+After compiling, pass the following command:
 
 `java -classpath JTransforms.jar:. STuner`
+
+Alternatively, execute the jar file:
+
+`java -jar STuner.jar`
 
 You need to have a microphone connected to your computer before you run STuner. If you forget, close STuner, plug in the microphone, then start it again.
 
